@@ -1,0 +1,32 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class CameraFollow : MonoBehaviour
+{
+    Vector3 startPos;
+    public GameObject player;
+    public float shake;
+    public float shakeTime;
+    Vector3 angles;
+    private void Start()
+    {
+        startPos = transform.position;
+        angles = transform.localEulerAngles;
+    }
+    // Update is called once per frame
+    void Update()
+    {
+        if (shakeTime > Time.realtimeSinceStartup && shakeTime<Time.realtimeSinceStartup + 0.1f)
+        {
+
+        }
+        Vector3 pos = player.transform.position;
+        pos.z = transform.position.z;
+        //pos.y = (pos.y + startPos.y)/2;
+        pos.y += 3;
+        transform.position = pos;
+        transform.localEulerAngles = angles + new Vector3(Random.Range(-shake, shake), Random.Range(-shake, shake), Random.Range(-shake, shake));
+        shake /= 1 + Time.deltaTime;
+    }
+}

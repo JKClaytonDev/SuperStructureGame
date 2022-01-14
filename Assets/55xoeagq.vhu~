@@ -1,0 +1,72 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerScript : MonoBehaviour
+{
+    public Animator anim;
+    AnimationEvent jumpEVT;
+    Rigidbody rb;
+    public float walkSpeed;
+    // Start is called before the first frame update
+    void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        jumpEVT = new AnimationEvent();
+        jumpEVT.functionName = "Jump";
+    }
+    void Jump()
+    {
+        GetComponent<Rigidbody>().velocity = new Vector3(0, 6, 0);
+    }
+    // Update is called once per frame
+    void Update()
+    {
+        anim.SetBool("Walk", Mathf.Abs(Input.GetAxis("Horizontal")) > 0.5f);
+        anim.SetBool("Jump", Input.GetKey(KeyCode.Space));
+        anim.SetFloat("YVel", rb.velocity.y);
+        RaycastHit hit;
+        Physics.Raycast(transform.position, Vector3.down, out hit);
+        Vector3 angles = transform.localEulerAngles;
+        if (hit.transform.gameObject.layer == 7) {
+            angles.x = hit.transform.localEulerAngles.x;
+        }
+
+        anim.SetFloat("Raycast", hit.distance);
+        anim.SetBool("StairClimb", false);
+        anim.SetBool("GrabWall", false);
+        anim.SetBool("GrabDown", Input.GetKey(KeyCode.Space));
+        AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
+        if (Physics.Raycast(transform.position + Vector3.up + transform.forward, Vector3.down, out hit))
+        {
+            if (!Physics.Raycast(transform.position, Vector3.down, 1))
+            anim.SetBool("GrabWall", hit.distance < 2);
+
+        }
+        if (Physics.Raycast(transform.position+Vector3.up, transform.forward, out hit))
+        {
+            anim.SetFloat("ForwardRaycast", hit.distance);
+            anim.SetBool("Push", hit.distance < 1 && hit.transform.gameObject.GetComponent<Rigidbody>());
+        }
+        else
+        {
+            anim.SetFloat("ForwardRaycast", 200);
+            anim.SetBool("Push", false);
+            if (Physics.Raycast(transform.position, transform.forward, out hit))
+            {
+                anim.SetBool("StairClimb", hit.distance < 1 || (state.IsName("ClimbStairs")) && hit.distance < 5);
+            }
+
+        }
+        if (Mathf.Abs(Input.GetAxis("Horizontal")) > 0.5f)
+        {
+            transform.localEulerAngles = new Vector3(0, 90, 0);
+            if (Input.GetAxis("Horizontal") < 0)
+                transform.localEulerAngles = new Vector3(0, -90, 0);
+        }
+        Vector3 vel = rb.velocity;
+        vel.x = transform.forward.x * walkSpeed * 1;
+
+        rb.velocity = vel;
+    }
+}

@@ -1,0 +1,29 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Statue : MonoBehaviour
+{
+    Animator anim;
+    GameObject player;
+    Rigidbody rb;
+    // Start is called before the first frame update
+    void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        anim = GetComponent<Animator>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (!player)
+            player = FindObjectOfType<PlayerScript>().gameObject;
+        AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
+        if (state.IsName("Run") || state.IsName("Run 0"))
+        {
+            rb.velocity = transform.forward;
+        }
+
+    }
+}

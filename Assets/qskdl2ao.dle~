@@ -1,0 +1,139 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerScript : MonoBehaviour
+{
+    public Animator anim;
+    AnimationEvent jumpEVT;
+    AnimationEvent stepSound;
+    AnimationEvent landSound;
+    public AudioClip[] stepSounds;
+    public AudioClip[] jumpSounds;
+    Rigidbody rb;
+    public float walkSpeed;
+    public float climbSpeed;
+    float speed;
+    float slideTime;
+    float runTime;
+    // Start is called before the first frame update
+    void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        stepSound = new AnimationEvent();
+        stepSound.functionName = "Step";
+        jumpEVT = new AnimationEvent();
+        jumpEVT.functionName = "Jump";
+    }
+    void Jump()
+    {
+        GetComponent<AudioSource>().PlayOneShot(jumpSounds[Random.Range(0, stepSounds.Length-1)]);
+
+        GetComponent<Rigidbody>().velocity = new Vector3(0, 6, 0);
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            GetComponent<Rigidbody>().velocity = new Vector3(6, 4, 0);
+            runTime = Time.realtimeSinceStartup + 1;
+        }
+
+    }
+    void Step()
+    {
+        GetComponent<AudioSource>().PlayOneShot(stepSounds[Random.Range(0, stepSounds.Length-1)]);
+    }
+    // Update is called once per frame
+    void Update()
+    {
+        
+        AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
+        if (state.IsName("LadderClimb"))
+        {
+            GetComponent<Rigidbody>().velocity = 2 * Vector3.up * climbSpeed * Input.GetAxis("Vertical");
+            anim.speed = Input.GetAxis("Vertical") * 2;
+            return;
+        }
+        anim.speed = 1;
+        anim.SetBool("Walk", Mathf.Abs(Input.GetAxis("Horizontal")) > 0.5f);
+        anim.SetBool("Jump", Input.GetKey(KeyCode.Space));
+        anim.SetFloat("YVel", rb.velocity.y);
+        RaycastHit hit;
+        Physics.Raycast(transform.position, Vector3.down, out hit);
+        Vector3 angles = transform.localEulerAngles;
+        angles.x = 0;
+
+        if (Mathf.Abs(Input.GetAxis("Horizontal")) > 0.5f)
+        {
+            angles.y = 90;
+            if (Input.GetAxis("Horizontal") < 0)
+                angles.y = -90;
+        }
+        transform.localEulerAngles = angles;
+        float horizVel = 0;
+        anim.SetBool("Sliding", false);
+        if (state.IsName("Run") && anim.GetBool("Jump"))
+            anim.Play("Jump");
+        if (hit.transform.gameObject.layer == 6 && hit.distance < 2)
+        {
+            if (Time.realtimeSinceStartup > slideTime + 0.1f)
+            {
+                speed += Time.deltaTime*3;
+                anim.SetBool("Sliding", true);
+                if (!state.IsName("Slide"))
+                    anim.Play("Slide");
+                transform.LookAt(transform.position + hit.transform.forward);
+                horizVel = hit.transform.forward.x * 3 * speed;
+            }
+        }
+        else
+        {
+            speed = 0;
+            slideTime = Time.realtimeSinceStartup;
+        }
+
+        bool run = (Input.GetKey(KeyCode.LeftShift));
+        anim.SetBool("Run", run);
+        anim.SetFloat("Raycast", hit.distance);
+        anim.SetBool("StairClimb", false);
+        anim.SetBool("GrabWall", false);
+        anim.SetBool("GrabDown", Input.GetKey(KeyCode.Space));
+        if (Physics.Raycast(transform.position + Vector3.up + transform.forward, Vector3.down, out hit))
+        {
+            if (!Physics.Raycast(transform.position, Vector3.down, 1))
+            anim.SetBool("GrabWall", hit.distance < 2);
+
+        }
+        if (Physics.Raycast(transform.position+Vector3.up, transform.forward, out hit))
+        {
+            anim.SetFloat("ForwardRaycast", hit.distance);
+            anim.SetBool("Push", hit.distance < 1 && hit.transform.gameObject.GetComponent<Rigidbody>());
+        }
+        else
+        {
+            anim.SetFloat("ForwardRaycast", 200);
+            anim.SetBool("Push", false);
+            if (Physics.Raycast(transform.position, transform.forward, out hit))
+            {
+                anim.SetBool("StairClimb", hit.distance < 1 || (state.IsName("ClimbStairs")) && hit.distance < 5);
+            }
+
+        }
+        
+        if (anim.GetFloat("Raycast") < 0.4f || state.IsName("JumpGrab"))
+        {
+            Vector3 vel = rb.velocity;
+            if (horizVel == 0)
+                vel.x = transform.forward.x * walkSpeed * 1;
+            else
+                vel.x = horizVel;
+            rb.velocity = vel;
+
+        }
+        else if (Time.realtimeSinceStartup < runTime)
+        {
+            Vector3 vel = rb.velocity;
+                vel.x = transform.forward.x * 6;
+  
+            rb.velocity = vel;
+        }
+    }
+}

@@ -1,0 +1,53 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+public class TextCollide : MonoBehaviour
+{
+    public string[] word;
+    public GameObject text;
+    private void Start()
+    {
+        GetComponent<MeshRenderer>().enabled = false;
+    }
+    private IEnumerator OnTriggerEnter(Collider collision)
+    {
+        if (collision.gameObject.GetComponent<PlayerScript>())
+        {
+            for (int i = 0; i < word.Length; i++)
+            {
+                cloneObject(word[i] + "", i, collision.gameObject);
+                yield return new WaitForSeconds(0.03f);
+            }
+            yield return new WaitForSeconds(1f);
+            for (int i = 0; i<word.Length; i++) {
+            foreach (floatText t in FindObjectsOfType<floatText>())
+            {
+                if (t.gameObject.GetComponent<Rigidbody>())
+                {
+                    if (t.GetComponent<Rigidbody>().velocity == new Vector3())
+                    {
+                        GameObject cloneText = t.gameObject;
+                        cloneText.transform.eulerAngles = new Vector3(0, 0, 0);
+                        cloneText.GetComponent<Rigidbody>().velocity = Vector3.up * (1 + cloneText.GetComponent<floatText>().pos * 3);
+                        Destroy(cloneText.GetComponent<floatText>());
+                        cloneText.transform.parent = null;
+                        cloneText.transform.eulerAngles = new Vector3(0, 0, 0);
+                    }
+                }
+            }
+        }
+        }
+    }
+
+    void cloneObject(string letter, float pos, GameObject collision)
+    {
+        GameObject cloneText = Instantiate(text);
+        cloneText.transform.parent = collision.transform;
+        cloneText.GetComponent<TextMesh>().text = letter;
+        cloneText.transform.position = collision.gameObject.transform.position + new Vector3(0, 2, 0) + Vector3.right * (1 + pos / 5);
+        cloneText.transform.eulerAngles = new Vector3(0, 0, 0);
+        cloneText.GetComponent<Rigidbody>().velocity = new Vector3();
+        
+    }
+}

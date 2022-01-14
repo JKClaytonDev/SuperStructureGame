@@ -1,0 +1,34 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Buttons : MonoBehaviour
+{
+    public GameObject player;
+    public GameObject continueButton;
+    private void Start()
+    {
+        Debug.Log("HAS KEY " + PlayerPrefs.HasKey("X"));    
+        Cursor.visible = true;
+    }
+    private void Update()
+    {
+        continueButton.gameObject.SetActive(PlayerPrefs.HasKey("X"));
+    }
+    public void newGame()
+    {
+        PlayerPrefs.DeleteAll();
+    }
+    public void quit()
+    {
+        Application.Quit();
+    }
+    public void continueGame(){
+        Vector3 pos = new Vector3();
+        pos.x = PlayerPrefs.GetFloat("X");
+        pos.y = PlayerPrefs.GetFloat("Y");
+        pos.z = PlayerPrefs.GetFloat("Z");
+        player.transform.position = pos;
+        FindObjectOfType<CameraFollow>().setDistance();
+    }
+}

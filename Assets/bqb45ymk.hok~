@@ -1,0 +1,36 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+public class checkPoint : MonoBehaviour
+{
+    float spawnDistance;
+    // Start is called before the first frame update
+    private void Start()
+    {
+        spawnDistance = Vector3.Distance(transform.position, FindObjectOfType<PlayerScript>().transform.position);
+        //GetComponent<BoxCollider>().enabled = ;
+    }
+    private void OnEnable()
+    {
+        GetComponent<MeshRenderer>().enabled = false;
+
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        PlayerPrefs.SetFloat("X", other.gameObject.transform.position.x);
+        PlayerPrefs.SetFloat("Y", other.gameObject.transform.position.y);
+        PlayerPrefs.SetFloat("Z", other.gameObject.transform.position.z);
+        
+        int sceneIndex = SceneManager.GetActiveScene().buildIndex;
+        if (other.transform.position.x > transform.position.x && spawnDistance > 15)
+            sceneIndex++;
+        else if (spawnDistance > 15)
+            sceneIndex--;
+        PlayerPrefs.SetInt("Scene", sceneIndex);
+        PlayerPrefs.Save();
+
+        SceneManager.LoadScene(sceneIndex);
+    }
+
+}

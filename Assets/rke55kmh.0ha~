@@ -1,0 +1,49 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerScript : MonoBehaviour
+{
+    public Animator anim;
+    AnimationEvent jumpEVT;
+    Rigidbody rb;
+    // Start is called before the first frame update
+    void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        jumpEVT = new AnimationEvent();
+        jumpEVT.functionName = "Jump";
+    }
+    void Jump()
+    {
+        GetComponent<Rigidbody>().velocity = new Vector3(0, 6, 0);
+    }
+    // Update is called once per frame
+    void Update()
+    {
+        anim.SetBool("Walk", Mathf.Abs(Input.GetAxis("Horizontal")) > 0.5f);
+        anim.SetBool("Jump", Input.GetKey(KeyCode.Space));
+        anim.SetFloat("YVel", rb.velocity.y);
+        RaycastHit hit;
+        Physics.Raycast(transform.position, Vector3.down, out hit);
+        anim.SetFloat("Raycast", hit.distance);
+        Physics.Raycast(transform.position, transform.forward, out hit);
+        anim.SetFloat("ForwardRaycast", hit.distance);
+        anim.SetBool("Push", hit.distance < 1 && hit.transform.gameObject.GetComponent<Rigidbody>());
+
+        if (Mathf.Abs(Input.GetAxis("Horizontal")) > 0.5f)
+        {
+            transform.localEulerAngles = new Vector3(0, 90, 0);
+            if (Input.GetAxis("Horizontal") < 0)
+                transform.localEulerAngles = new Vector3(0, -90, 0);
+        }
+        AnimatorStateInfo state = anim.GetCurrentAnimatorStateInfo(0);
+        Vector3 vel = rb.velocity;
+        if (state.IsName("Walk"))
+            vel.x = transform.forward.x * 2;
+        else if (state.IsName("PushWalk"))
+            vel.x = transform.forward.x * 1;
+        vel.y = rb.velocity.y;
+        rb.velocity = vel;
+    }
+}

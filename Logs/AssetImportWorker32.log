@@ -1,0 +1,21 @@
+Using pre-set license
+Built from 'trunk' branch; Version is '2021.2.0a13 (71a161db37e2) revision 7446881'; Using compiler version '192829333'; Build Type 'Release'
+OS: 'Windows 10 Home; OS build 22000.348; Version 2009; 64bit' Language: 'en' Physical Memory: 16206 MB
+BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1, IsPro: 0
+
+ COMMAND LINE ARGUMENTS:
+D:\UnityInstalls\2021.2.0a13\Editor\Unity.exe
+-adb2
+-batchMode
+-noUpm
+-name
+AssetImportWorker32
+-projectPath
+D:/UnityProjects/TrustFallGL
+-logFile
+Logs/AssetImportWorker32.log
+-srvPort
+51482
+Successfully changed project path to: D:/UnityProjects/TrustFallGL
+D:/UnityProjects/TrustFallGL
+Using Asset Import Pipeline V2.
